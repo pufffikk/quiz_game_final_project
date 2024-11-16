@@ -15,7 +15,7 @@ class Quiz(Base):
     __tablename__ = 'quizzes'
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     author = Column(String, nullable=False)
 
     questions = relationship("Question", secondary=quiz_question, back_populates="quizes")
