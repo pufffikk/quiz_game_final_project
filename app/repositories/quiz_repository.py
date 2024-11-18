@@ -1,5 +1,6 @@
 from typing import List
 
+from fastapi import HTTPException
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
@@ -13,6 +14,9 @@ class QuizRepository:
 
     def get_quiz_by_id(self, quiz_id: int):
         return self.session.query(Quiz).filter(Quiz.id == quiz_id).first()
+
+    def get_quiz_by_name(self, quiz_name: str):
+        return self.session.query(Quiz).filter(Quiz.name == quiz_name).first()
 
     def create_quiz(self, name: str, author: str):
         new_quiz = Quiz(name=name, author=author)
@@ -33,6 +37,12 @@ class QuizRepository:
         elif order == "desc":
             return self.session.query(Quiz).order_by(desc(getattr(Quiz, field))).all()
         return self.session.query(Quiz).all()
+
+    def list_questions_by_quiz(self, quiz_name: str):
+        quiz = self.session.query(Quiz).filter(Quiz.name == quiz_name).first()
+        if quiz is None:
+            raise HTTPException(status_code=404, detail="Quiz with such name was not found")
+        return quiz.questions
 
     def delete_quiz_by_id(self, quiz_id: int):
         quiz = self.session.query(Quiz).filter(Quiz.id == quiz_id).first()

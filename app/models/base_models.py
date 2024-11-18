@@ -7,5 +7,6 @@ class QuizModel(BaseModel):
 
 
 class QuestionModel(BaseModel):
+    name: str
     question: str
     answer: str

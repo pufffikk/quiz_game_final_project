@@ -28,9 +28,12 @@
 </head>
 <body>
     <form id="createQuestion">
+        <label for="name">Name (unique identifier for your question):</label>
+        <input type="text" id="name" name="name" required>
+        <h1></h1>
         <label for="question">Question:</label>
         <input type="text" id="question" name="question" required>
-
+        <h1></h1>
         <label for="answer">Answer:</label>
         <input type="text" id="answer" name="answer" required>
 
@@ -46,6 +49,7 @@
     <script>
         document.getElementById("createQuestionButton").addEventListener("click", function(event) {
             const data = {
+                name: document.getElementById("name").value,
                 question: document.getElementById("question").value,
                 answer: document.getElementById("answer").value
             };
