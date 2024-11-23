@@ -39,6 +39,8 @@ def list_quizzes(request: Request, field: str = 'name', sort_by: str = "name",
 
     questions_repo = QuestionRepository(db)
     questions = questions_repo.list_questions(field, order)
+    for question in questions:
+        print(question.quizzes)
     return templates.TemplateResponse("questions.html",
                                       {"request": request,
                                        "questions": questions,

@@ -18,7 +18,7 @@ class Quiz(Base):
     name = Column(String, nullable=False, unique=True, index=True)
     author = Column(String, nullable=False)
 
-    questions = relationship("Question", secondary=quiz_question, back_populates="quizes")
+    questions = relationship("Question", secondary=quiz_question, back_populates="quizzes")
 
 
 class Question(Base):
@@ -29,4 +29,4 @@ class Question(Base):
     question = Column(String, nullable=False)
     answer = Column(String, nullable=False)
 
-    quizes = relationship("Quiz", secondary=quiz_question, back_populates="questions")
+    quizzes = relationship("Quiz", secondary=quiz_question, back_populates="questions")

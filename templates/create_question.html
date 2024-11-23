@@ -37,6 +37,10 @@
         <label for="answer">Answer:</label>
         <input type="text" id="answer" name="answer" required>
 
+        <h1></h1>
+        <label for="quiz">Quiz name (Optional):</label>
+        <input type="text" id="quiz" name="quiz" required>
+
         <button type="button" id="createQuestionButton">Create Question</button>
 
         <h1></h1>
@@ -54,6 +58,9 @@
                 answer: document.getElementById("answer").value
             };
 
+            const quizName = document.getElementById("name").value;
+            const questionName = document.getElementById("quiz").value;
+
             fetch("http://127.0.0.1:8000/app/questions/", {
                 method: "POST",
                 headers: {
@@ -68,6 +75,32 @@
                     });
                 }
                 return response.json();
+            })
+            .then(result => {
+                const successMessage = document.getElementById("successMessage");
+                successMessage.style.display = "block";
+                setTimeout(() => {
+                    successMessage.style.display = "none";
+                }, 3000);
+                document.getElementById("createQuestion").reset();
+                document.getElementById("errorMessage").style.display = "none";
+            })
+            .catch(error => {
+                const errorMessage = document.getElementById("errorMessage");
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.style.display = "block";
+                setTimeout(() => {
+                    errorMessage.style.display = "none";
+                }, 5000);
+            });
+
+            const url = `http://127.0.0.1:8000/app/questions/${encodeURIComponent(quizName)}/${encodeURIComponent(questionName)}`;
+
+            fetch(url, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                }
             })
             .then(result => {
                 const successMessage = document.getElementById("successMessage");

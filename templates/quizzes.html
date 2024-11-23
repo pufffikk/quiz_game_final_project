@@ -25,6 +25,9 @@
                         Author
                       </a>
                   </th>
+                  <th>
+                      Questions list
+                  </th>
                 </tr>
             </thead>
             <tbody>
@@ -32,6 +35,17 @@
                 <tr>
                   <td>{{ quiz.name }}</td>
                   <td>{{ quiz.author }}</td>
+                  <td>
+                      {% if quiz.questions %}
+                          <ul>
+                              {% for item in quiz.questions %}
+                              <li>{{ item.name }}</li>
+                              {% endfor %}
+                          </ul>
+                      {% else %}
+                          <em>No additional info</em>
+                      {% endif %}
+                  </td>
                 </tr>
                 {% endfor %}
             </tbody>

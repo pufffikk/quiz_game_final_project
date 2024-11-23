@@ -30,6 +30,9 @@
                         Answer
                       </a>
                   </th>
+                  <th>
+                      Quizzes List
+                  </th>
                 </tr>
             </thead>
             <tbody>
@@ -38,6 +41,17 @@
                   <td>{{ question.name }}</td>
                   <td>{{ question.answer }}</td>
                   <td>{{ question.question }}</td>
+                  <td>
+                      {% if question.quizzes %}
+                          <ul>
+                              {% for item in question.quizzes %}
+                              <li>{{ item.name }}</li>
+                              {% endfor %}
+                          </ul>
+                      {% else %}
+                          <em>No additional info</em>
+                      {% endif %}
+                  </td>
                 </tr>
                 {% endfor %}
             </tbody>
