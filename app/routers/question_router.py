@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Union
 from fastapi import Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
@@ -5,11 +6,13 @@ from sqlalchemy.orm import Session
 from starlette.templating import Jinja2Templates
 from fastapi import APIRouter, Request
 from app.database import get_db
-from app.models.base_models import QuestionModel
+from app.models.base_models import QuestionModel, UserAnswerModel
+from app.models.db_models import UserAnswer
 from app.repositories.question_repository import QuestionRepository
 from fastapi.responses import HTMLResponse
 
 from app.repositories.quiz_repository import QuizRepository
+from app.repositories.user_answer_repository import UserAnswerRepository
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -58,6 +61,34 @@ def list_questions_by_quiz(request: Request, quiz_name: str,
                                        "questions": questions,
                                        "sort_by": sort_by,
                                        "order": order})
+
+
+@router.get("/questions/{quiz_name}/next", response_model=QuestionModel)
+def get_next_question(quiz_name: str, current_index: int, db: Session = Depends(get_db)):
+    quiz_repo = QuizRepository(db)
+    questions = quiz_repo.list_questions_by_quiz(quiz_name)
+    if len(questions) == 0:
+        raise HTTPException(status_code=406, detail="There no quiz with such name")
+    if current_index < len(questions):
+        return questions[current_index]
+    else:
+        raise HTTPException(status_code=404, detail="No more questions available")
+
+
+@router.post("/questions/{quiz_name}/save_results")
+def save_results(
+    user_data: UserAnswerModel,
+    db: Session = Depends(get_db)
+):
+    try:
+        repo = UserAnswerRepository(db)
+        repo.create_answer(user_name=user_data.user_name,
+                           quiz_name=user_data.quiz_name,
+                           correct_answers=user_data.correct_answers,
+                           percentage=user_data.percentage,
+                           date=datetime.now())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving results: {e}")
 
 
 @router.put("/questions/{quiz_name}/{question_name}")

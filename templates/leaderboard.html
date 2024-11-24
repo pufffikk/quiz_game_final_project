@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participation List</title>
+    <!-- Bootstrap CSS via CDN -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <button onclick="window.location.href='/'">Go Home</button>
+    <h1></h1>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Participation List</h1>
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                  <th>
+                      <a href="?sort_by=user_name&order={{ 'asc' if sort_by != 'user_name' or order == 'desc' else 'desc' }}">
+                        User name
+                      </a>
+                  </th>
+                  <th>
+                      <a href="?sort_by=quiz_name&order={{ 'asc' if sort_by != 'quiz_name' or order == 'desc' else 'desc' }}">
+                        Quiz name
+                      </a>
+                  </th>
+                  <th>
+                      <a href="?sort_by=correct_answers&order={{ 'asc' if sort_by != 'correct_answers' or order == 'desc' else 'desc' }}">
+                        Correct answers
+                      </a>
+                  </th>
+                  <th>
+                      <a href="?sort_by=percentage&order={{ 'asc' if sort_by != 'percentage' or order == 'desc' else 'desc' }}">
+                        Percentage
+                      </a>
+                  </th>
+                  <th>
+                      <a href="?sort_by=date&order={{ 'asc' if sort_by != 'date' or order == 'desc' else 'desc' }}">
+                        Date
+                      </a>
+                  </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in answers %}
+                <tr>
+                  <td>{{ question.user_name }}</td>
+                  <td>{{ question.quiz_name }}</td>
+                  <td>{{ question.correct_answers }}</td>
+                  <td>{{ question.percentage }}</td>
+                  <td>{{ question.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap JS and dependencies (optional) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -2,8 +2,8 @@ from fastapi import Depends
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 
 from app.database import get_db
-from app.models.db_models import User
 from app.schemas.schemas import UserCreate
+from app.user_async_database import User
 
 
 def get_user_db(db_session=Depends(get_db)):

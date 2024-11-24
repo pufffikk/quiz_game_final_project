@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -30,3 +30,14 @@ class Question(Base):
     answer = Column(String, nullable=False)
 
     quizzes = relationship("Quiz", secondary=quiz_question, back_populates="questions")
+
+
+class UserAnswer(Base):
+    __tablename__ = 'user_answers'
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    user_name = Column(String, nullable=False, index=True)
+    quiz_name = Column(String, nullable=False)
+    correct_answers = Column(Integer, nullable=False)
+    percentage = Column(Integer, nullable=False)
+    date = Column(DateTime(timezone=True))

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .question-box {
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 50%;
+            font-size: 18px;
+        }
+        .question-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        #endMessage {
+            display: none;
+            font-size: 20px;
+            color: green;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz: {{ quiz_name }}</h1>
+    <div class="question-box" id="questionBox">
+        <div class="question-header" id="questionName">Press "Next Question" to start!</div>
+        <div id="questionText"></div>
+        <input type="text" id="answerInput" placeholder="Your answer" style="display:none;">
+        <button id="submitAnswer" style="display:none;">Submit Answer</button>
+    </div>
+    <button id="nextButton">Next Question</button>
+    <div id="endMessage">Quiz completed! Thank you for participating.</div>
+
+    <script>
+        let currentIndex = 0;
+        let correctAnswers = 0;
+        const quizName = "{{ quiz_name }}";
+        const userName = "John"; // Replace with dynamic user identification if needed.
+
+        document.getElementById("nextButton").addEventListener("click", async function () {
+            await loadNextQuestion();
+        });
+
+        document.getElementById("submitAnswer").addEventListener("click", function () {
+            const userAnswer = document.getElementById("answerInput").value?.trim().toLowerCase()|| "";
+            const correctAnswer = document.getElementById("questionBox").dataset.correctAnswer?.toLowerCase() || "";
+
+            if (userAnswer === correctAnswer) {
+                correctAnswers++;
+            }
+            currentIndex++;
+            loadNextQuestion();
+        });
+
+        async function loadNextQuestion() {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/app/questions/${quizName}/next?current_index=${currentIndex}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        endQuiz();
+                    }
+                    if (response.status === 406) {
+                        alert("Quiz with such name was not found!");
+                        return;
+                    }
+                    else {
+                        throw new Error("An error occurred while fetching the question.");
+                    }
+                    return;
+                }
+
+                const question = await response.json();
+
+                document.getElementById("questionName").textContent = question.name;
+                document.getElementById("questionText").textContent = question.question;
+                document.getElementById("questionBox").dataset.correctAnswer = question.answer;
+
+                document.getElementById("answerInput").style.display = "block";
+                document.getElementById("submitAnswer").style.display = "block";
+                document.getElementById("nextButton").style.display = "none";
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function endQuiz() {
+            document.getElementById("nextButton").style.display = "none";
+            document.getElementById("submitAnswer").style.display = "none";
+            document.getElementById("answerInput").style.display = "none";
+            document.getElementById("endMessage").style.display = "block";
+
+            const questionBox = document.getElementById("questionBox");
+            questionBox.innerHTML = "<p>Congratulations! You have completed the quiz.</p>";
+
+            const jsonAnswer = {
+                user_name: userName,
+                quiz_name: quizName,
+                correct_answers: correctAnswers,
+                percentage: currentIndex > 0 ? Math.round((correctAnswers / currentIndex) * 100) : 0
+            };
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/app/questions/${quizName}/save_results`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(jsonAnswer),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to save quiz results.");
+                }
+                alert("Quiz results saved successfully!");
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+    </script>
+    <h1></h1>
+    <button onclick="window.location.href='/'">Go Home</button>
+</body>
+</html>

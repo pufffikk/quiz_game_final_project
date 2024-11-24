@@ -10,6 +10,11 @@
 <body>
     <button onclick="window.location.href='/'">Go Home</button>
     <h1></h1>
+    <form id="startQuiz">
+        <label for="quiz_name">Please enter the name of the quiz, you want to start:</label>
+        <input type="text" id="quiz_name" name="quiz_name" required>
+        <button type="button" id="startQuizButton">Start quiz</button>
+    </form>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Quizzes List</h1>
         <table class="table table-striped table-bordered">
@@ -56,5 +61,19 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+    document.getElementById("startQuizButton").addEventListener("click", function(event) {
+        event.preventDefault();
+
+        const quiz_name = document.getElementById("quiz_name").value.trim();
+
+        if (!quiz_name) {
+            alert("Please enter a quiz name!");
+            return;
+        }
+
+        window.location.href = `/game?quiz_name=${quiz_name}`;
+    });
+    </script>
 </body>
 </html>

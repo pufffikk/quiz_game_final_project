@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -10,3 +12,10 @@ class QuestionModel(BaseModel):
     name: str
     question: str
     answer: str
+
+
+class UserAnswerModel(BaseModel):
+    user_name: str
+    quiz_name: str
+    correct_answers: int
+    percentage: int
