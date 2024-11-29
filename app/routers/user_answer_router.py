@@ -7,9 +7,10 @@ from fastapi import APIRouter, Request
 from app.database import get_db
 from app.repositories.quiz_repository import QuizRepository
 from app.repositories.user_answer_repository import UserAnswerRepository
+from app.utils import templates
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+
 
 valid_fields = ['user_name', 'quiz_name', 'correct_answers', 'percentage', 'date']
 

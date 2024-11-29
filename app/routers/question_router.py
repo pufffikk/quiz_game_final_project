@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session
 from starlette.templating import Jinja2Templates
 from fastapi import APIRouter, Request
 from app.database import get_db
+from app.user_async_database import User
+from app.users import current_active_user
+from app.utils import templates
 from app.models.base_models import QuestionModel, UserAnswerModel
 from app.models.db_models import UserAnswer
 from app.repositories.question_repository import QuestionRepository
@@ -15,7 +18,6 @@ from app.repositories.quiz_repository import QuizRepository
 from app.repositories.user_answer_repository import UserAnswerRepository
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
 
 valid_fields = ['name', 'question', 'answer']
 
@@ -23,6 +25,11 @@ valid_fields = ['name', 'question', 'answer']
 @router.get("/create_question", response_class=HTMLResponse)
 def create_quiz_html(request: Request):
     return templates.TemplateResponse("create_question.html", {"request": request})
+
+
+@router.get("/connect_quiz_and_question", response_class=HTMLResponse)
+def connect_quiz_and_question(request: Request):
+    return templates.TemplateResponse("connect_quiz_question.html", {"request": request})
 
 
 @router.post("/questions/")
@@ -42,8 +49,6 @@ def list_quizzes(request: Request, field: str = 'name', sort_by: str = "name",
 
     questions_repo = QuestionRepository(db)
     questions = questions_repo.list_questions(field, order)
-    for question in questions:
-        print(question.quizzes)
     return templates.TemplateResponse("questions.html",
                                       {"request": request,
                                        "questions": questions,
@@ -67,8 +72,6 @@ def list_questions_by_quiz(request: Request, quiz_name: str,
 def get_next_question(quiz_name: str, current_index: int, db: Session = Depends(get_db)):
     quiz_repo = QuizRepository(db)
     questions = quiz_repo.list_questions_by_quiz(quiz_name)
-    if len(questions) == 0:
-        raise HTTPException(status_code=406, detail="There no quiz with such name")
     if current_index < len(questions):
         return questions[current_index]
     else:
@@ -78,11 +81,12 @@ def get_next_question(quiz_name: str, current_index: int, db: Session = Depends(
 @router.post("/questions/{quiz_name}/save_results")
 def save_results(
     user_data: UserAnswerModel,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: User = Depends(current_active_user)
 ):
     try:
         repo = UserAnswerRepository(db)
-        repo.create_answer(user_name=user_data.user_name,
+        repo.create_answer(user_name=user.email,
                            quiz_name=user_data.quiz_name,
                            correct_answers=user_data.correct_answers,
                            percentage=user_data.percentage,

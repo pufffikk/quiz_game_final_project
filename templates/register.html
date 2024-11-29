@@ -3,23 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>User Registration</title>
 </head>
 <body>
-    <h2>Register</h2>
-    <form action="/register/" method="post">
-        <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <div>
-            <button type="submit">Register</button>
-        </div>
+    <h1>Register</h1>
+    <form id="registrationForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <label for="is_active">Is Active:</label>
+        <input type="checkbox" id="is_active" name="is_active" checked><br><br>
+
+        <label for="is_superuser">Is Superuser:</label>
+        <input type="checkbox" id="is_superuser" name="is_superuser"><br><br>
+
+        <label for="is_verified">Is Verified:</label>
+        <input type="checkbox" id="is_verified" name="is_verified"><br><br>
+
+        <button type="submit">Register</button>
     </form>
     <p>Already have an account? <a href="/login">Login here</a></p>
+    <div id="successMessage" style="display:none; color: green;">User registered successfully!</div>
+    <div id="errorMessage" style="display:none; color: red;"></div>
+
+    <script>
+        document.getElementById("registrationForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const is_active = document.getElementById("is_active").checked;
+            const is_superuser = document.getElementById("is_superuser").checked;
+            const is_verified = document.getElementById("is_verified").checked;
+
+            if (password.length < 6) {
+                document.getElementById("errorMessage").textContent = "Password must be at least 6 characters.";
+                document.getElementById("errorMessage").style.display = "block";
+                return;
+            }
+
+            const data = {
+                email: email,
+                password: password,
+                is_active: is_active,
+                is_superuser: is_superuser,
+                is_verified: is_verified
+            };
+
+            fetch("http://127.0.0.1:8000/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.detail || "Registration failed");
+                    });
+                }
+                return response.json();
+            })
+            .then(result => {
+                if (result.email) {
+                    document.getElementById("successMessage").style.display = "block";
+                    document.getElementById("registrationForm").reset();
+                    document.getElementById("errorMessage").style.display = "none";
+                }
+            })
+            .catch(error => {
+                document.getElementById("errorMessage").textContent = `Error: ${error.message}`;
+                document.getElementById("errorMessage").style.display = "block";
+            });
+        });
+    </script>
 </body>
 </html>

@@ -4,12 +4,13 @@ from sqlalchemy.orm import Session
 from starlette.templating import Jinja2Templates
 from fastapi import APIRouter, Request
 from app.database import get_db
+from app.utils import templates
 from app.models.base_models import QuizModel
 from app.repositories.quiz_repository import QuizRepository
 from fastapi.responses import HTMLResponse
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+
 
 valid_fields = ['name', 'author']
 

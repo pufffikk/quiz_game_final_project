@@ -6,7 +6,7 @@ from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin, models
 from fastapi_users.authentication import (
     AuthenticationBackend,
     BearerTransport,
-    JWTStrategy,
+    JWTStrategy, CookieTransport,
 )
 from fastapi_users.db import SQLAlchemyUserDatabase
 
@@ -50,6 +50,16 @@ auth_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy,
 )
 
-fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
+
+# COOKIE AUTH
+cookie_transport = CookieTransport(cookie_max_age=86400)
+
+cookie_auth_backend = AuthenticationBackend(
+  name="cookie",  # I changed the name
+  transport=cookie_transport,
+  get_strategy=get_jwt_strategy,
+)
+
+fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend, cookie_auth_backend])
 
 current_active_user = fastapi_users.current_user(active=True)

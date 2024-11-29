@@ -15,7 +15,6 @@ class QuestionModel(BaseModel):
 
 
 class UserAnswerModel(BaseModel):
-    user_name: str
     quiz_name: str
     correct_answers: int
     percentage: int
