@@ -51,12 +51,93 @@
     <a href="/app/user_answers/">Participants list</a>
     <p> </p>
     <a href="/app/connect_quiz_and_question/">Connect quiz with question</a>
+    <p> </p>
+    <form id="loginForm">
+        <h2>Login</h2>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="button" id="loginButton">Login</button>
+        <a href="/register">Register</a>
+    </form>
+    <button id="logoutButton" style="display:none;">Logout</button>
+    <div id="message"></div>
     <div class="tasks">
         <h2>Improvement Tasks</h2>
         <ul>
-            <li>Create game logic</li>
             <li>Create good frontend.</li>
         </ul>
     </div>
+    <script>
+        window.onload = () => {
+            const isLoggedIn = localStorage.getItem("isLoggedIn");
+            if (isLoggedIn === "true") {
+                showLogout();
+            } else {
+                showLogin();
+            }
+        };
+        document.getElementById("loginButton").addEventListener("click", async () => {
+            const username = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            const data = new URLSearchParams();
+            data.append('grant_type', 'password');
+            data.append('username', username);
+            data.append('password', password);
+            data.append('scope', ''); // Optional, if needed
+            data.append('client_id', 'string'); // Optional
+            data.append('client_secret', 'string'); // Optional
+            try {
+                const response = await fetch('http://127.0.0.1:8000/auth/cookie/login', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: data
+                });
+                if (response.ok) {
+                    localStorage.setItem("isLoggedIn", "true");
+                    document.getElementById("message").innerText = "Login successful!";
+                    showLogout();
+                } else {
+                    document.getElementById("message").innerText = "Login failed.";
+                }
+            } catch (error) {
+                document.getElementById("message").innerText = `Error: ${error.message}`;
+            }
+        });
+
+        document.getElementById("logoutButton").addEventListener("click", async () => {
+            try {
+                const response = await fetch("http://127.0.0.1:8000/auth/cookie/logout", {
+                    method: "POST",
+                    credentials: "include"
+                });
+                if (response.ok) {
+                    localStorage.setItem("isLoggedIn", "false");
+                    document.getElementById("message").innerText = "Logged out.";
+                    showLogin();
+                } else {
+                    document.getElementById("message").innerText = "Logout failed.";
+                }
+            } catch (error) {
+                document.getElementById("message").innerText = `Error: ${error.message}`;
+            }
+        });
+        function showLogin() {
+            document.getElementById("loginForm").style.display = "block";
+            document.getElementById("logoutButton").style.display = "none";
+        }
+
+        function showLogout() {
+            document.getElementById("loginForm").style.display = "none";
+            document.getElementById("logoutButton").style.display = "block";
+        }
+    </script>
 </body>
 </html>

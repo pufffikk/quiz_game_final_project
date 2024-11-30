@@ -2,10 +2,8 @@ from app.models.base_models import UserAnswerModel
 from typing import List
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from starlette.templating import Jinja2Templates
 from fastapi import APIRouter, Request
 from app.database import get_db
-from app.repositories.quiz_repository import QuizRepository
 from app.repositories.user_answer_repository import UserAnswerRepository
 from app.utils import templates
 

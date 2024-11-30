@@ -1,8 +1,6 @@
-
 from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse
-from fastapi import FastAPI, Request, Depends, Response
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, Request, Depends, HTTPException
 
 from app.routers.question_router import router as question_router
 from app.routers.quiz_router import router as quiz_router
@@ -56,10 +54,18 @@ application.include_router(
 )
 
 
+@application.exception_handler(HTTPException)
+async def auth_exception_handler(request: Request, exc: HTTPException):
+    if exc.status_code == 401:  # Unauthorized
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "message": "You must be logged in to access this page"}
+        )
+    raise exc
+
+
 @application.get("/authenticated-route")
 async def authenticated_route(user: User = Depends(current_active_user)):
-    if not user:
-        return RedirectResponse(url="/login")
     return {"message": f"Hello {user.email}!"}
 
 
@@ -79,5 +85,6 @@ async def login_form(request: Request):
 
 
 @application.get("/game", response_class=HTMLResponse)
-def create_quiz_html(quiz_name: str, request: Request):
+def create_quiz_html(quiz_name: str, request: Request, user: User = Depends(current_active_user)):
     return templates.TemplateResponse("game.html", {"request": request, "quiz_name": quiz_name})
+

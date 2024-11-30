@@ -3,14 +3,12 @@ from typing import List, Union
 from fastapi import Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from starlette.templating import Jinja2Templates
 from fastapi import APIRouter, Request
 from app.database import get_db
 from app.user_async_database import User
 from app.users import current_active_user
 from app.utils import templates
 from app.models.base_models import QuestionModel, UserAnswerModel
-from app.models.db_models import UserAnswer
 from app.repositories.question_repository import QuestionRepository
 from fastapi.responses import HTMLResponse
 
@@ -23,17 +21,18 @@ valid_fields = ['name', 'question', 'answer']
 
 
 @router.get("/create_question", response_class=HTMLResponse)
-def create_quiz_html(request: Request):
+def create_quiz_html(request: Request, user: User = Depends(current_active_user)):
     return templates.TemplateResponse("create_question.html", {"request": request})
 
 
 @router.get("/connect_quiz_and_question", response_class=HTMLResponse)
-def connect_quiz_and_question(request: Request):
+def connect_quiz_and_question(request: Request, user: User = Depends(current_active_user)):
     return templates.TemplateResponse("connect_quiz_question.html", {"request": request})
 
 
 @router.post("/questions/")
-def create_quiz(questions: Union[QuestionModel, List[QuestionModel]], db: Session = Depends(get_db)):
+def create_quiz(questions: Union[QuestionModel, List[QuestionModel]], db: Session = Depends(get_db),
+                user: User = Depends(current_active_user)):
     questions_repo = QuestionRepository(db)
     if isinstance(questions, list):
         return questions_repo.create_multiple_questions(questions)
@@ -43,7 +42,7 @@ def create_quiz(questions: Union[QuestionModel, List[QuestionModel]], db: Sessio
 
 @router.get("/questions", response_model=List[QuestionModel])
 def list_quizzes(request: Request, field: str = 'name', sort_by: str = "name",
-                 order: str = "asc", db: Session = Depends(get_db)):
+                 order: str = "asc", db: Session = Depends(get_db), user: User = Depends(current_active_user)):
     if field not in valid_fields:
         raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
 
@@ -58,7 +57,8 @@ def list_quizzes(request: Request, field: str = 'name', sort_by: str = "name",
 
 @router.get("/questions/{quiz_name}", response_model=List[QuestionModel])
 def list_questions_by_quiz(request: Request, quiz_name: str,
-                           sort_by: str = "name", order: str = "asc", db: Session = Depends(get_db)):
+                           sort_by: str = "name", order: str = "asc", db: Session = Depends(get_db),
+                           user: User = Depends(current_active_user)):
     quiz_repo = QuizRepository(db)
     questions = quiz_repo.list_questions_by_quiz(quiz_name)
     return templates.TemplateResponse("questions.html",
@@ -69,7 +69,8 @@ def list_questions_by_quiz(request: Request, quiz_name: str,
 
 
 @router.get("/questions/{quiz_name}/next", response_model=QuestionModel)
-def get_next_question(quiz_name: str, current_index: int, db: Session = Depends(get_db)):
+def get_next_question(quiz_name: str, current_index: int, db: Session = Depends(get_db),
+                      user: User = Depends(current_active_user)):
     quiz_repo = QuizRepository(db)
     questions = quiz_repo.list_questions_by_quiz(quiz_name)
     if current_index < len(questions):
@@ -96,7 +97,8 @@ def save_results(
 
 
 @router.put("/questions/{quiz_name}/{question_name}")
-def connect_question_with_quiz(quiz_name: str, question_name: str, db: Session = Depends(get_db)):
+def connect_question_with_quiz(quiz_name: str, question_name: str, db: Session = Depends(get_db),
+                               user: User = Depends(current_active_user)):
     quiz_repo = QuizRepository(db)
     question_repo = QuestionRepository(db)
     db_quiz = quiz_repo.get_quiz_by_name(quiz_name)

@@ -65,6 +65,9 @@
         </form>
         <div id="errorMessage" class="error-message">Error: Invalid login credentials.</div>
     </div>
+    {% if message %}
+    <div id="message">{{ message }}</div>
+    {% endif %}
 
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(event) {
@@ -94,11 +97,7 @@
                 if (response.ok) {
 
 
-                    // Save the token
-                    //localStorage.setItem('access_token', accessToken);
-                    //localStorage.setItem('username', username);
-
-                    // Redirect to the dashboard or another page
+                    localStorage.setItem("isLoggedIn", "true");
                     window.location.href = '/';
                 } else {
                     const error = await response.json();
