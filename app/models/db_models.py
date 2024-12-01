@@ -6,8 +6,8 @@ from app.database import Base
 
 quiz_question = Table(
     'quiz_question', Base.metadata,
-    Column('quiz_id', Integer, ForeignKey('questions.id'), primary_key=True),
-    Column('question_id', Integer, ForeignKey('quizzes.id'), primary_key=True)
+    Column('quiz_id', Integer, ForeignKey('questions.id', ondelete='CASCADE'), primary_key=True),
+    Column('question_id', Integer, ForeignKey('quizzes.id', ondelete='CASCADE'), primary_key=True)
 )
 
 
@@ -18,7 +18,7 @@ class Quiz(Base):
     name = Column(String, nullable=False, unique=True, index=True)
     author = Column(String, nullable=False)
 
-    questions = relationship("Question", secondary=quiz_question, back_populates="quizzes")
+    questions = relationship("Question", secondary=quiz_question, back_populates="quizzes", cascade="save-update")
 
 
 class Question(Base):
@@ -29,7 +29,7 @@ class Question(Base):
     question = Column(String, nullable=False)
     answer = Column(String, nullable=False)
 
-    quizzes = relationship("Quiz", secondary=quiz_question, back_populates="questions")
+    quizzes = relationship("Quiz", secondary=quiz_question, back_populates="questions", cascade="save-update")
 
 
 class UserAnswer(Base):

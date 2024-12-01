@@ -30,6 +30,11 @@ def connect_quiz_and_question(request: Request, user: User = Depends(current_act
     return templates.TemplateResponse("connect_quiz_question.html", {"request": request})
 
 
+@router.get("/delete_question", response_class=HTMLResponse)
+def delete_question_html(request: Request, user: User = Depends(current_active_user)):
+    return templates.TemplateResponse("delete_question.html", {"request": request})
+
+
 @router.post("/questions/")
 def create_quiz(questions: Union[QuestionModel, List[QuestionModel]], db: Session = Depends(get_db),
                 user: User = Depends(current_active_user)):
@@ -111,3 +116,9 @@ def connect_question_with_quiz(quiz_name: str, question_name: str, db: Session =
     db.commit()
     db.refresh(db_quiz)
     return jsonable_encoder(db_quiz)
+
+
+@router.delete("/questions/delete/{question_name}")
+def delete_question(question_name: str, db: Session = Depends(get_db), user: User = Depends(current_active_user)):
+    question_repo = QuestionRepository(db)
+    return question_repo.delete_question_by_name(question_name)

@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse
 from fastapi import FastAPI, Request, Depends, HTTPException
+from starlette.responses import JSONResponse
 
 from app.routers.question_router import router as question_router
 from app.routers.quiz_router import router as quiz_router
@@ -61,7 +62,10 @@ async def auth_exception_handler(request: Request, exc: HTTPException):
             "login.html",
             {"request": request, "message": "You must be logged in to access this page"}
         )
-    raise exc
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
 
 
 @application.get("/authenticated-route")
