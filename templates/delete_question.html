@@ -31,7 +31,7 @@
         <label for="questionName">Enter the question name to delete:</label>
         <input type="text" id="questionName" name="questionName" required>
 
-        <button type="button" id="deleteQuizButton">Delete quiz</button>
+        <button type="button" id="deleteQuestionButton">Delete question</button>
         <h1></h1>
         <button onclick="window.location.href='/'">Go Home</button>
     </form>
@@ -40,7 +40,7 @@
     <div id="errorMessage"></div>
 
     <script>
-        document.getElementById("deleteQuizButton").addEventListener("click", function(event) {
+        document.getElementById("deleteQuestionButton").addEventListener("click", function(event) {
             const questionName = document.getElementById("questionName").value;
 
             if (!questionName) {
