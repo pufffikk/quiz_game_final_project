@@ -15,7 +15,7 @@ from app.user_async_database import User
 from app.users import current_active_user
 from app.utils import templates
 
-# Test database setup
+
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

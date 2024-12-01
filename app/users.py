@@ -55,7 +55,7 @@ auth_backend = AuthenticationBackend(
 cookie_transport = CookieTransport(cookie_max_age=86400)
 
 cookie_auth_backend = AuthenticationBackend(
-  name="cookie",  # I changed the name
+  name="cookie",
   transport=cookie_transport,
   get_strategy=get_jwt_strategy,
 )

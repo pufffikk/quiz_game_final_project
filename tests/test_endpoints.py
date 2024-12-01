@@ -2,12 +2,10 @@ from typing import List
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 from starlette.templating import Jinja2Templates
 from starlette.testclient import TestClient
-from fastapi import Request
 
 from app.database import get_db
 from app.main import application
