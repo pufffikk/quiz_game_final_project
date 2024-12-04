@@ -17,8 +17,37 @@ async def lifespan(application: FastAPI):
     await create_db_and_tables()
     yield
 
+description = """
+Amazing quiz app API helps you to create quizzes, questions and play these quizzes. 🚀
+"""
+tags_metadata = [
+    {
+        "name": "game",
+        "description": "Start point for playing a quiz",
+    },
+    {
+        "name": "authenticated-route",
+        "description": "Just for test, that authentication is working",
+    },
+]
+application = FastAPI(
+    title="Amazing quiz app",
+    description=description,
+    summary="Amazing quiz app for working with quizzes.",
+    version="0.0.1",
+    terms_of_service="http://example.com/terms/",
+    contact={
+        "name": "Amazing quiz app",
+        "email": "rbabadzhanov94@gmail.com",
+    },
+    license_info={
+        "name": "Apache 2.0",
+        "identifier": "MIT",
+    },
+    lifespan=lifespan,
+    openapi_tags=tags_metadata,
+)
 
-application = FastAPI(lifespan=lifespan)
 
 application.include_router(quiz_router, prefix="/app", tags=["quizzes"])
 application.include_router(question_router, prefix="/app", tags=["questions"])
@@ -68,7 +97,7 @@ async def auth_exception_handler(request: Request, exc: HTTPException):
     )
 
 
-@application.get("/authenticated-route")
+@application.get("/authenticated-route", tags=["authenticated-route"])
 async def authenticated_route(user: User = Depends(current_active_user)):
     return {"message": f"Hello {user.email}!"}
 
@@ -88,7 +117,7 @@ async def login_form(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
-@application.get("/game", response_class=HTMLResponse)
-def create_quiz_html(quiz_name: str, request: Request, user: User = Depends(current_active_user)):
+# This endpoint run the game
+@application.get("/game", response_class=HTMLResponse, tags=["game"])
+def game(quiz_name: str, request: Request, user: User = Depends(current_active_user)):
     return templates.TemplateResponse("game.html", {"request": request, "quiz_name": quiz_name})
-
