@@ -52,7 +52,7 @@ auth_backend = AuthenticationBackend(
 
 
 # COOKIE AUTH
-cookie_transport = CookieTransport(cookie_max_age=86400)
+cookie_transport = CookieTransport(cookie_max_age=86400, cookie_secure=False,)
 
 cookie_auth_backend = AuthenticationBackend(
   name="cookie",
