@@ -85,7 +85,7 @@
             data.append('client_secret', 'string'); // Optional
 
             try {
-                const response = await fetch('http://127.0.0.1:8000/auth/cookie/login', {
+                const response = await fetch('/auth/cookie/login', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',

@@ -62,7 +62,7 @@
     const questionName = document.getElementById("name").value.trim();
 
     try {
-        await fetch("http://127.0.0.1:8000/app/questions/", {
+        await fetch("/app/questions/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -71,7 +71,7 @@
         });
 
         if (quizName) {
-            const url = `http://127.0.0.1:8000/app/questions/${encodeURIComponent(quizName)}/${encodeURIComponent(questionName)}`;
+            const url = `/app/questions/${encodeURIComponent(quizName)}/${encodeURIComponent(questionName)}`;
             await fetch(url, {
                 method: "PUT",
                 headers: {

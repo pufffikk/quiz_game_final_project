@@ -50,7 +50,7 @@
                 author: document.getElementById("author").value
             };
 
-            fetch("http://127.0.0.1:8000/app/quizzes/", {
+            fetch("/app/quizzes/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

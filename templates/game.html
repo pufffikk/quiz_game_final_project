@@ -64,7 +64,7 @@
 
         async function loadNextQuestion() {
             try {
-                const response = await fetch(`http://127.0.0.1:8000/app/questions/${quizName}/next?current_index=${currentIndex}`);
+                const response = await fetch(`/app/questions/${quizName}/next?current_index=${currentIndex}`);
                 if (!response.ok) {
                     if (response.status === 404 && currentIndex === 0) {
                         alert("Quiz with such name was not found!");
@@ -113,7 +113,7 @@
                 percentage: currentIndex > 0 ? Math.round((correctAnswers / currentIndex) * 100) : 0
             };
             try {
-                const response = await fetch(`http://127.0.0.1:8000/app/questions/${quizName}/save_results`, {
+                const response = await fetch(`/app/questions/${quizName}/save_results`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json"},
                     body: JSON.stringify(jsonAnswer),
