@@ -97,6 +97,11 @@ async def auth_exception_handler(request: Request, exc: HTTPException):
     )
 
 
+@application.get("/health")
+def health():
+    return {"status": "ok"}
+
+
 @application.get("/authenticated-route", tags=["authenticated-route"])
 async def authenticated_route(user: User = Depends(current_active_user)):
     return {"message": f"Hello {user.email}!"}
