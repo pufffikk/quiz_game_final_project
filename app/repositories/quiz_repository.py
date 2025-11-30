@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import HTTPException
 from sqlalchemy import asc, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.base_models import QuizModel, QuestionModel
 from app.models.db_models import Quiz, Question
@@ -32,11 +32,12 @@ class QuizRepository:
         return quizzes
 
     def list_quizzes(self, field: str, order: str):
+        query = self.session.query(Quiz).options(joinedload(Quiz.questions)).distinct()
         if order == "asc":
-            return self.session.query(Quiz).order_by(asc(getattr(Quiz, field))).all()
+            return query.order_by(asc(getattr(Quiz, field))).all()
         elif order == "desc":
-            return self.session.query(Quiz).order_by(desc(getattr(Quiz, field))).all()
-        return self.session.query(Quiz).all()
+            return query.order_by(desc(getattr(Quiz, field))).all()
+        return query.all()
 
     def list_questions_by_quiz(self, quiz_name: str):
         quiz = self.session.query(Quiz).filter(Quiz.name == quiz_name).first()

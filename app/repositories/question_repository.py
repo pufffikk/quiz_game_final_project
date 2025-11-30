@@ -1,7 +1,7 @@
 from typing import List
 
 from sqlalchemy import asc, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.base_models import QuestionModel
 from app.models.db_models import Question
@@ -32,11 +32,12 @@ class QuestionRepository:
         return new_questions
 
     def list_questions(self, field: str, order: str):
+        query = self.session.query(Question).options(joinedload(Question.quizzes)).distinct()
         if order == "asc":
-            return self.session.query(Question).order_by(asc(getattr(Question, field))).all()
+            return query.order_by(asc(getattr(Question, field))).all()
         elif order == "desc":
-            return self.session.query(Question).order_by(desc(getattr(Question, field))).all()
-        return self.session.query(Question).all()
+            return query.order_by(desc(getattr(Question, field))).all()
+        return query.all()
 
     def delete_question_by_id(self, question_id: int):
         question = self.session.query(Question).filter(Question.id == question_id).first()

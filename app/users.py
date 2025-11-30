@@ -52,7 +52,14 @@ auth_backend = AuthenticationBackend(
 
 
 # COOKIE AUTH
-cookie_transport = CookieTransport(cookie_max_age=86400)
+# For localhost development, use "lax" samesite
+# For production with different domains, use "none" with secure=True
+cookie_transport = CookieTransport(
+    cookie_max_age=86400,
+    cookie_samesite="lax",  # Works for same-site requests
+    cookie_httponly=True,
+    cookie_secure=False,  # Set to True in production with HTTPS
+)
 
 cookie_auth_backend = AuthenticationBackend(
   name="cookie",

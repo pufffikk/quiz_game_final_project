@@ -16,6 +16,8 @@ def get_engine():
     global _engine
     if _engine is None:
         database_url = os.getenv("DATABASE_URL")
+        if database_url is None:
+            database_url = "postgresql://postgres:test@127.0.0.1:55433/postgres"
         _engine = create_engine(database_url)
         Base.metadata.create_all(bind=get_engine())
     return _engine

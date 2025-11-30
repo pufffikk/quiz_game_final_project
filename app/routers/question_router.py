@@ -3,14 +3,12 @@ from typing import List, Union
 from fastapi import Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from app.database import get_db
 from app.user_async_database import User
 from app.users import current_active_user
-from app.utils import templates
 from app.models.base_models import QuestionModel, UserAnswerModel
 from app.repositories.question_repository import QuestionRepository
-from fastapi.responses import HTMLResponse
 
 from app.repositories.quiz_repository import QuizRepository
 from app.repositories.user_answer_repository import UserAnswerRepository
@@ -18,21 +16,6 @@ from app.repositories.user_answer_repository import UserAnswerRepository
 router = APIRouter()
 
 valid_fields = ['name', 'question', 'answer']
-
-
-@router.get("/create_question", response_class=HTMLResponse)
-def create_quiz_html(request: Request, user: User = Depends(current_active_user)):
-    return templates.TemplateResponse("create_question.html", {"request": request})
-
-
-@router.get("/connect_quiz_and_question", response_class=HTMLResponse)
-def connect_quiz_and_question(request: Request, user: User = Depends(current_active_user)):
-    return templates.TemplateResponse("connect_quiz_question.html", {"request": request})
-
-
-@router.get("/delete_question", response_class=HTMLResponse)
-def delete_question_html(request: Request, user: User = Depends(current_active_user)):
-    return templates.TemplateResponse("delete_question.html", {"request": request})
 
 
 @router.post("/questions/")
@@ -46,40 +29,40 @@ def create_quiz(questions: Union[QuestionModel, List[QuestionModel]], db: Sessio
 
 
 @router.get("/questions", response_model=List[QuestionModel])
-def list_quizzes(request: Request, field: str = 'name', sort_by: str = "name",
+def list_quizzes(field: str = 'name', sort_by: str = "name",
                  order: str = "asc", db: Session = Depends(get_db), user: User = Depends(current_active_user)):
     if field not in valid_fields:
         raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
 
     questions_repo = QuestionRepository(db)
-    questions = questions_repo.list_questions(field, order)
-    return templates.TemplateResponse("questions.html",
-                                      {"request": request,
-                                       "questions": questions,
-                                       "sort_by": sort_by,
-                                       "order": order})
+    db_questions = questions_repo.list_questions(field, order)
+    from app.models.base_models import QuizModel
+    questions = []
+    for q in db_questions:
+        quizzes = [QuizModel(name=quiz.name, author=quiz.author) for quiz in q.quizzes] if q.quizzes else []
+        questions.append(QuestionModel(name=q.name, question=q.question, answer=q.answer, quizzes=quizzes))
+    return questions
 
 
 @router.get("/questions/{quiz_name}", response_model=List[QuestionModel])
-def list_questions_by_quiz(request: Request, quiz_name: str,
+def list_questions_by_quiz(quiz_name: str,
                            sort_by: str = "name", order: str = "asc", db: Session = Depends(get_db),
                            user: User = Depends(current_active_user)):
     quiz_repo = QuizRepository(db)
-    questions = quiz_repo.list_questions_by_quiz(quiz_name)
-    return templates.TemplateResponse("questions.html",
-                                      {"request": request,
-                                       "questions": questions,
-                                       "sort_by": sort_by,
-                                       "order": order})
+    db_questions = quiz_repo.list_questions_by_quiz(quiz_name)
+    # Convert SQLAlchemy models to Pydantic models
+    questions = [QuestionModel(name=q.name, question=q.question, answer=q.answer) for q in db_questions]
+    return questions
 
 
 @router.get("/questions/{quiz_name}/next", response_model=QuestionModel)
 def get_next_question(quiz_name: str, current_index: int, db: Session = Depends(get_db),
                       user: User = Depends(current_active_user)):
     quiz_repo = QuizRepository(db)
-    questions = quiz_repo.list_questions_by_quiz(quiz_name)
-    if current_index < len(questions):
-        return questions[current_index]
+    db_questions = quiz_repo.list_questions_by_quiz(quiz_name)
+    if current_index < len(db_questions):
+        q = db_questions[current_index]
+        return QuestionModel(name=q.name, question=q.question, answer=q.answer)
     else:
         raise HTTPException(status_code=404, detail="No more questions available")
 

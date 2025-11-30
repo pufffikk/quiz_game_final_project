@@ -1,29 +1,17 @@
 from typing import List, Union
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from app.database import get_db
 from app.user_async_database import User
 from app.users import current_active_user
-from app.utils import templates
 from app.models.base_models import QuizModel
 from app.repositories.quiz_repository import QuizRepository
-from fastapi.responses import HTMLResponse
 
 router = APIRouter()
 
 
 valid_fields = ['name', 'author']
-
-
-@router.get("/create_quiz", response_class=HTMLResponse)
-def create_quiz_html(request: Request, user: User = Depends(current_active_user)):
-    return templates.TemplateResponse("create_quiz.html", {"request": request})
-
-
-@router.get("/delete_quiz", response_class=HTMLResponse)
-def delete_quiz_html(request: Request, user: User = Depends(current_active_user)):
-    return templates.TemplateResponse("delete_quiz.html", {"request": request})
 
 
 @router.post("/quizzes/")
@@ -43,15 +31,16 @@ def delete_quiz(quiz_name: str, db: Session = Depends(get_db), user: User = Depe
 
 
 @router.get("/quizzes", response_model=List[QuizModel])
-def list_quizzes(request: Request, field: str = 'name', sort_by: str = "name", order: str = "asc",
+def list_quizzes(field: str = 'name', sort_by: str = "name", order: str = "asc",
                  db: Session = Depends(get_db), user: User = Depends(current_active_user)):
     if field not in valid_fields:
         raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
 
     quiz_repo = QuizRepository(db)
-    quizzes = quiz_repo.list_quizzes(field, order)
-    return templates.TemplateResponse("quizzes.html",
-                                      {"request": request,
-                                       "quizzes": quizzes,
-                                       "sort_by": sort_by,
-                                       "order": order})
+    db_quizzes = quiz_repo.list_quizzes(field, order)
+    from app.models.base_models import QuestionModel
+    quizzes = []
+    for q in db_quizzes:
+        questions = [QuestionModel(name=question.name, question=question.question, answer=question.answer) for question in q.questions] if q.questions else []
+        quizzes.append(QuizModel(name=q.name, author=q.author, questions=questions))
+    return quizzes
